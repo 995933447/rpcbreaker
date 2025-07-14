@@ -62,15 +62,20 @@ func NewFailCountThreshold(consecutiveSec int64, thresholdCount int64) *FailCoun
 	go func() {
 		tk := time.NewTicker(time.Second)
 		defer tk.Stop()
+		lastRmExpiredAt := time.Now().Unix()
 		for {
 			<-tk.C
-			expired := time.Now().Unix() - consecutiveSec
+			now := time.Now().Unix()
+			expired := now - consecutiveSec
 			s.mu.RLock()
-			if count, ok := s.failSpreed.Load(expired); ok {
-				s.failSpreed.Delete(expired)
-				s.failTotal.Add(-count.(*atomic.Int64).Load())
+			for i := lastRmExpiredAt; i <= expired; i++ {
+				if count, ok := s.failSpreed.Load(expired); ok {
+					s.failSpreed.Delete(expired)
+					s.failTotal.Add(-count.(*atomic.Int64).Load())
+				}
 			}
 			s.mu.RUnlock()
+			lastRmExpiredAt = now
 		}
 	}()
 	return s
