@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var DisabledMatchByRpcService = false
+
 type RpcBreaker interface {
 	OnRpc(req []interface{}, resp []interface{})
 	Fallback(...interface{}) []interface{}
@@ -22,6 +24,12 @@ func GetRpcBreaker(rpcSvc, rpcMethod string) (RpcBreaker, bool) {
 	breaker, ok := breakers.Load(genBreakerKey(rpcSvc, rpcMethod))
 	if !ok {
 		return nil, false
+	}
+	if !DisabledMatchByRpcService {
+		breaker, ok := breakers.Load(genBreakerKey(rpcSvc, "*"))
+		if !ok {
+			return nil, false
+		}
 	}
 	b, ok := breaker.(RpcBreaker)
 	if !ok {
