@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var DisabledMatchByRpcService = false
+var DisabledMatchByRpcService bool
 
 type RpcBreaker interface {
 	OnRpc(req []interface{}, resp []interface{})
