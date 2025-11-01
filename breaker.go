@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var DisabledMatchByRpcService bool
+var DisabledMatchByWildcard bool
 
 type RpcBreaker interface {
 	OnRpc(req []interface{}, resp []interface{})
@@ -25,7 +25,7 @@ func GetRpcBreaker(rpcSvc, rpcMethod string) (RpcBreaker, bool) {
 	if !ok {
 		return nil, false
 	}
-	if !DisabledMatchByRpcService {
+	if !DisabledMatchByWildcard {
 		breaker, ok = breakers.Load(genBreakerKey(rpcSvc, "*"))
 		if !ok {
 			breaker, ok = breakers.Load(genBreakerKey("*", "*"))
