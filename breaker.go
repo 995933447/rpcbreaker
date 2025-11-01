@@ -28,7 +28,10 @@ func GetRpcBreaker(rpcSvc, rpcMethod string) (RpcBreaker, bool) {
 	if !DisabledMatchByRpcService {
 		breaker, ok = breakers.Load(genBreakerKey(rpcSvc, "*"))
 		if !ok {
-			return nil, false
+			breaker, ok = breakers.Load(genBreakerKey("*", "*"))
+			if !ok {
+				return nil, false
+			}
 		}
 	}
 	b, ok := breaker.(RpcBreaker)
